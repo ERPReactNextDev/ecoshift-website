@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ArrowRight, Mail, Menu, Phone, ShoppingCart, X } from 'lucide-react'
 import { useQuote } from '@/lib/quote-context'
@@ -68,20 +69,17 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="group flex shrink-0 items-center gap-2.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            className="group flex shrink-0 items-center rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             aria-label="Ecoshift Corporation — Home"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-emerald-500 text-white shadow-md shadow-brand-600/25 transition-transform group-hover:scale-105">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-8 2 .9 3 .74 5.9.16 8H17Z" />
-              </svg>
-            </span>
-            <span className="flex flex-col leading-none">
-              <span className="text-lg font-extrabold tracking-tight text-zinc-900">Ecoshift</span>
-              <span className="mt-0.5 hidden text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-brand-700 sm:block">
-                Corporation
-              </span>
-            </span>
+            <Image
+              src="/logo/ecoshift.png"
+              alt="Ecoshift Corporation"
+              width={180}
+              height={44}
+              priority
+              className="h-10 w-auto object-contain transition-transform group-hover:scale-105 sm:h-11"
+            />
           </Link>
 
           {/* Desktop nav — clean links with a green active pill */}
