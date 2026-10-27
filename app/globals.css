@@ -2,83 +2,179 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                        */
+/* ------------------------------------------------------------------ */
+:root {
+  --green:   #16a34a;
+  --green-d: #14532d;
+  --ink:     #0e1a14;
+  --paper:   #f5f4f0;
+  --rule:    #d4d0c8;
+  --muted:   #6b7280;
+  --radius:  2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                 */
+/* ------------------------------------------------------------------ */
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
+  html { scroll-behavior: smooth; }
+
   body {
-    /* Whisper-light green page wash — keeps the environment-first feel while
-       still reading as a bright, airy white. */
-    @apply bg-[#f7fbf8] text-zinc-900 antialiased;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold leading-tight tracking-tight;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
   }
+
   ::selection {
-    @apply bg-brand-200 text-brand-900;
+    background: #bbf7d0;
+    color: #14532d;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
   }
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 142 71% 45%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 142 71% 45%;
-    --radius: 0.75rem;
+/* ------------------------------------------------------------------ */
+/* Utility classes                                                      */
+/* ------------------------------------------------------------------ */
+@layer utilities {
+  /* Thin horizontal rule — used as a layout device, not decoration */
+  .rule { border-top: 1px solid var(--rule); }
+
+  /* Left accent bar — replaces rounded badges */
+  .bar-accent {
+    border-left: 3px solid var(--green);
+    padding-left: 0.75rem;
   }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 142 71% 45%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 142 71% 45%;
+
+  /* Overline label — e.g. "Our Products" above a heading */
+  .overline {
+    display: block;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  /* Mono tag — item codes, SKUs */
+  .mono-tag {
+    font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Components                                                           */
+/* ------------------------------------------------------------------ */
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-600/20;
+
+  /* Primary button — no rounded, solid fill, press effect */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.375rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    background: var(--green);
+    color: #fff;
+    border: 1.5px solid var(--green);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 120ms, transform 80ms, box-shadow 120ms;
   }
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-brand-600 text-brand-600 font-semibold hover:bg-brand-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2;
+  .btn:hover { background: var(--green-d); border-color: var(--green-d); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Ghost / outline button */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.375rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--rule);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color 120ms, color 120ms;
   }
-  .input-field {
-    @apply w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors bg-white;
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+  /* Text input */
+  .field {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    background: #fff;
+    border: 1.5px solid var(--rule);
+    border-radius: var(--radius);
+    transition: border-color 120ms;
   }
-  .card {
-    @apply bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden;
+  .field:focus { border-color: var(--green); outline: none; }
+
+  /* Product card — editorial, no round corners */
+  .product-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    transition: border-color 200ms, box-shadow 200ms;
   }
-  .container-page {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  .product-card:hover {
+    border-color: var(--green);
+    box-shadow: 0 4px 20px 0 rgba(22, 163, 74, 0.10);
+  }
+
+  /* Section container — full width with consistent padding */
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .container { padding-left: 2rem; padding-right: 2rem; }
+  }
+  @media (min-width: 1024px) {
+    .container { padding-left: 3rem; padding-right: 3rem; }
+  }
+  @media (min-width: 1280px) {
+    .container { padding-left: 4rem; padding-right: 4rem; }
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Scrollbar                                                            */
+/* ------------------------------------------------------------------ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a0; }

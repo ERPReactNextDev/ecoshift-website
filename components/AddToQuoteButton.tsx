@@ -47,7 +47,7 @@ export default function AddToQuoteButton({ product, variant = 'stepper' }: Props
         type="button"
         onClick={() => handleQuantityChange(1)}
         aria-label={`Add ${product.name} to quote`}
-        className="group/btn flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-600/20 transition-all hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+        className="group/btn flex w-full items-center justify-center gap-2 bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1"
       >
         <ShoppingCart className="h-4 w-4 transition-transform group-hover/btn:-rotate-6" aria-hidden="true" />
         Add to Quote
@@ -60,7 +60,7 @@ export default function AddToQuoteButton({ product, variant = 'stepper' }: Props
     <div
       role="group"
       aria-label={`${product.name} quantity`}
-      className="flex items-stretch overflow-hidden rounded-xl border border-brand-600/25 bg-brand-50 text-brand-800"
+      className="flex items-stretch overflow-hidden border border-brand-600/30 bg-brand-50 text-brand-800"
     >
       <button
         type="button"

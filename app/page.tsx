@@ -134,7 +134,7 @@ export default async function HomePage() {
           </div>
         </Reveal>
         {featuredProducts.length > 0 ? (
-          <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-5">
             {featuredProducts.map((p, i) => (
               <li key={p.id}>
                 <Reveal delay={(i % 4) * 80} className="h-full">

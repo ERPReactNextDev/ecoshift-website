@@ -1,7 +1,8 @@
+/* Hero banner pulls itself up to sit behind the transparent fixed header */
+.hb { margin-top: -5rem; }
 .hb{--ink:#0b2e1a;--bg:#eef8f0;--green:#16a34a;--green-deep:#15803d;--green-soft:#dcfce7;--dur:6500ms;
-  color-scheme:light;font-family:var(--hb-font),"Segoe UI",system-ui,sans-serif;color:var(--ink)}
-.hb *,.hb *::before,.hb *::after{box-sizing:inherit}
-.hb{position:relative;width:100%;height:min(calc(100svh - 4rem),820px);min-height:600px;overflow:hidden;background:var(--bg)}
+  color-scheme:light;font-family:var(--hb-font),"Segoe UI",system-ui,sans-serif;color:var(--ink)}.hb *,.hb *::before,.hb *::after{box-sizing:inherit}
+.hb{position:relative;width:100%;height:min(100svh,900px);min-height:620px;overflow:hidden;background:var(--bg)}
 .hb .slide{position:absolute;inset:0;visibility:hidden;opacity:0;transition:opacity .9s ease,visibility 0s .9s}
 .hb .slide.on{visibility:visible;opacity:1;transition:opacity .9s ease}
 .hb .bg{position:absolute;inset:-4%;background-size:cover;background-position:center;filter:brightness(.94) saturate(.9)}
@@ -57,7 +58,7 @@
 @keyframes fill{to{width:100%}}
 .hb .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-@media (max-width:760px){.hb{height:max(calc(100svh - 4rem),640px)}
+@media (max-width:760px){.hb{height:max(100svh,640px)}
 .hb .shade{background:linear-gradient(0deg,rgba(247,251,248,.97) 0,rgba(247,251,248,.9) 52%,rgba(247,251,248,.15) 85%)}
 .hb .copy{left:20px;right:20px;width:auto;top:auto;bottom:112px;transform:none;text-align:left;align-items:flex-start;gap:12px}
 .hb .product{align-items:flex-start}

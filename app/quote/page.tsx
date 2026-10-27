@@ -28,6 +28,8 @@ export default function QuotePage() {
     if (honeypot) return
     if (!customerName.trim()) { setError('Name is required.'); return }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Valid email is required.'); return }
+    if (!phone.trim()) { setError('Phone number is required.'); return }
+    if (!message.trim()) { setError('Message is required.'); return }
     if (items.length === 0) { setError('Your quote basket is empty.'); return }
 
     setError('')
@@ -161,20 +163,20 @@ export default function QuotePage() {
               <input id="name" type="text" required value={customerName} onChange={e => setCustomerName(e.target.value)} className={field} placeholder="Your full name" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="company" className={fieldLabel}>Company</label>
-              <input id="company" type="text" value={company} onChange={e => setCompany(e.target.value)} className={field} placeholder="Company name (optional)" />
+              <label htmlFor="company" className={fieldLabel}>Company <span className="text-zinc-400 font-normal normal-case tracking-normal">(optional)</span></label>
+              <input id="company" type="text" value={company} onChange={e => setCompany(e.target.value)} className={field} placeholder="Company name" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email" className={fieldLabel}>Email <span className="text-red-500">*</span></label>
               <input id="email" type="email" required value={email} onChange={e => setEmail(e.target.value)} className={field} placeholder="your@email.com" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="phone" className={fieldLabel}>Phone</label>
-              <input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} className={field} placeholder="+63 9XX XXX XXXX" />
+              <label htmlFor="phone" className={fieldLabel}>Phone <span className="text-red-500">*</span></label>
+              <input id="phone" type="tel" required value={phone} onChange={e => setPhone(e.target.value)} className={field} placeholder="+63 9XX XXX XXXX" />
             </div>
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label htmlFor="message" className={fieldLabel}>Message</label>
-              <textarea id="message" rows={4} value={message} onChange={e => setMessage(e.target.value)} className={`${field} resize-y`} placeholder="Any additional details (optional)" />
+              <label htmlFor="message" className={fieldLabel}>Message <span className="text-red-500">*</span></label>
+              <textarea id="message" rows={4} required value={message} onChange={e => setMessage(e.target.value)} className={`${field} resize-y`} placeholder="Tell us about your project or requirements" />
             </div>
             <div className="hidden" aria-hidden="true">
               <input type="text" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={e => setHoneypot(e.target.value)} />

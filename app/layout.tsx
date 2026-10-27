@@ -3,6 +3,7 @@ import './globals.css'
 import { QuoteProvider } from '@/lib/quote-context'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import ScrollToTop from '@/components/ScrollToTop'
 import Script from 'next/script'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ecoshiftcorp.com'
@@ -55,9 +56,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QuoteProvider>
           <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 pt-20">{children}</main>
             <Footer />
           </div>
+          <ScrollToTop />
         </QuoteProvider>
 
         {gaId && (

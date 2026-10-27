@@ -3,15 +3,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Bricolage_Grotesque } from 'next/font/google'
 import './hero-banner.css'
-
-const font = Bricolage_Grotesque({
-  subsets: ['latin'],
-  weight: ['400', '600', '800'],
-  variable: '--hb-font',
-  display: 'swap'
-})
 
 const DURATION = 6500
 
@@ -101,7 +93,7 @@ export default function HeroBanner() {
 
   return (
     <section
-      className={`hb ${font.variable}${paused ? ' paused' : ''}`}
+      className={`hb${paused ? ' paused' : ''}`}
       aria-roledescription="carousel"
       aria-label="Brighter choice for every Filipino"
       onMouseEnter={() => setPaused(true)}
