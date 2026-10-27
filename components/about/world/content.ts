@@ -9,12 +9,19 @@ export const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 export const ease = (t: number) => t * t * (3 - 2 * t)
 
 export const CHAPTERS = [
+  { id: 'hero', label: 'Welcome', weight: 3 },
   { id: 'story', label: 'Our story', weight: 5 },
+  { id: 'clients', label: 'Who we serve', weight: 3 },
   { id: 'anatomy', label: 'The product', weight: 5 },
   { id: 'solar', label: 'Solar', weight: 4 },
   { id: 'truck', label: 'Delivery', weight: 3.5 },
   { id: 'reach', label: 'Nationwide', weight: 4 },
-  { id: 'install', label: 'Installation', weight: 6 }
+  { id: 'install', label: 'Installation', weight: 6 },
+  { id: 'why', label: 'Why Ecoshift', weight: 3 },
+  { id: 'mission', label: 'Our mission', weight: 3 },
+  { id: 'services', label: 'Services', weight: 3 },
+  { id: 'community', label: 'Community', weight: 3 },
+  { id: 'cta', label: 'Work with us', weight: 3 }
 ] as const
 
 export type ChapterId = (typeof CHAPTERS)[number]['id']
@@ -28,7 +35,7 @@ CHAPTERS.reduce((acc, c) => {
 STARTS.push(1)
 
 /** Height of the whole pinned journey, in viewport heights. */
-export const WORLD_HEIGHT_VH = Math.round(TOTAL * 72)
+export const WORLD_HEIGHT_VH = Math.round(TOTAL * 56)
 
 export function chapterAt(p: number): { i: number; q: number } {
   let i = 0
@@ -131,4 +138,10 @@ export function routePoint(r: number): [number, number] {
     d -= SEG[k]
   }
   return MAP_ROUTE[0]
+}
+
+/** Staggered reveal for item k of n inside a chapter: 0..1, fades out near the end. */
+export function reveal(q: number, k: number, step = 0.09): number {
+  const start = 0.08 + k * step
+  return ease(seg(q, start, start + 0.16)) * (1 - ease(seg(q, 0.9, 1)))
 }

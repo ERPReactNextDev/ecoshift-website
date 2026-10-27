@@ -19,7 +19,7 @@ import {
   type LampRig,
   type Variant
 } from './models'
-import { CHAPTERS, MAP_POINTS, MAP_ROUTE, MAP_CUM, chapterAt, clamp, ease, installState, lerp, reachState, routePoint, seg, solarState } from './content'
+import { CHAPTERS, type ChapterId, MAP_POINTS, MAP_ROUTE, MAP_CUM, chapterAt, clamp, ease, installState, lerp, reachState, routePoint, seg, solarState } from './content'
 
 export interface WorldOptions {
   canvas: HTMLCanvasElement
@@ -108,7 +108,7 @@ const rad = (d: number) => (d * Math.PI) / 180
 /* ------------------------------------------------------------------ */
 /* 1. Story: a night road, lamps switch on one by one                  */
 /* ------------------------------------------------------------------ */
-function storyChapter(ctx: Ctx): Chapter {
+function storyChapter(ctx: Ctx): Chapter & { lamps: LampRig[] } {
   const { mats, tex, scene, milestoneCount } = ctx
   const g = new THREE.Group()
   scene.add(g)
@@ -164,6 +164,7 @@ function storyChapter(ctx: Ctx): Chapter {
 
   return {
     group: g,
+    lamps,
     update(q) {
       const f = q * (Math.max(2, milestoneCount) - 1)
       lamps.forEach((l, i) => l.setLit(ease(clamp((f - i + 0.6) / 0.5))))
@@ -179,7 +180,7 @@ function storyChapter(ctx: Ctx): Chapter {
 /* ------------------------------------------------------------------ */
 /* 2. Anatomy: straight vs curved, part by part                        */
 /* ------------------------------------------------------------------ */
-function anatomyChapter(ctx: Ctx): Chapter {
+function anatomyChapter(ctx: Ctx): Chapter & { straight: LampRig; bent: LampRig; X0: number } {
   const { mats, tex, scene } = ctx
   const g = new THREE.Group()
   scene.add(g)
@@ -246,6 +247,9 @@ function anatomyChapter(ctx: Ctx): Chapter {
 
   return {
     group: g,
+    straight,
+    bent,
+    X0,
     update(q, t) {
       const n = 5
       const i = Math.min(n - 1, Math.floor(q * n))
@@ -768,7 +772,9 @@ function buildAct(ctx: Ctx, idx: number): ActRig {
   return { group: g, rigs, tilts, yaws, blocks, crane, slotX, poleZ, scale, camZ, X }
 }
 
-function installChapter(ctx: Ctx): Chapter {
+type InstallChapter = Chapter & { acts: ActRig[]; applyStages(act: ActRig, stages: number[], cur: number): void }
+
+function installChapter(ctx: Ctx): InstallChapter {
   const acts = [0, 1, 2].map(i => buildAct(ctx, i))
   const group = new THREE.Group()
   acts.forEach(a => group.add(a.group))
@@ -781,61 +787,150 @@ function installChapter(ctx: Ctx): Chapter {
     lamps: []
   }
   const sunEl = [3, 2, 4]
-  const tipW = new THREE.Vector3()
   const attachW = new THREE.Vector3()
   const attachL = new THREE.Vector3()
 
+  const applyStages = (act: ActRig, stages: number[], cur: number) => {
+    act.rigs.forEach((rig, i) => {
+      const s = stages[i]
+      const found = ease(seg(s, 0, 0.2))
+      const L = ease(seg(s, 0.22, 0.55))
+      const M = ease(seg(s, 0.55, 0.75))
+      const lit = ease(seg(s, 0.78, 0.92))
+      const poleOn = s > 0.2
+      act.blocks[i].visible = s > 0 && !poleOn
+      act.blocks[i].scale.y = Math.max(0.001, found)
+      act.blocks[i].position.y = 0.12 * Math.max(0.001, found)
+      act.tilts[i].visible = poleOn
+      act.tilts[i].rotation.z = rad(82) * (1 - L)
+      rig.top.position.y = 2.4 * (1 - M)
+      rig.top.visible = M > 0.01
+      rig.setLit(lit)
+    })
+    const craneOn = cur >= 0 && stages[cur] > 0.1 && stages[cur] < 0.88
+    act.crane.group.visible = craneOn
+    if (craneOn) {
+      const sx = act.slotX[cur]
+      act.crane.group.position.set(sx - 8.2, 0, act.poleZ)
+      const L = ease(seg(stages[cur], 0.22, 0.55))
+      const theta = rad(82) * (1 - L)
+      const H = act.rigs[cur].poleHeight * act.scale
+      attachW.set(sx - Math.sin(theta) * H * 0.78, Math.cos(theta) * H * 0.78, act.poleZ)
+      attachL.copy(attachW)
+      act.crane.group.worldToLocal(attachL)
+      const pos = act.crane.cable.geometry.attributes.position as THREE.BufferAttribute
+      pos.setXYZ(0, act.crane.tipLocal.x, act.crane.tipLocal.y, act.crane.tipLocal.z)
+      pos.setXYZ(1, attachL.x, attachL.y, attachL.z)
+      pos.needsUpdate = true
+    }
+  }
+
   return {
     group,
+    acts,
+    applyStages,
     update(q) {
       const st = installState(q)
       const act = acts[st.act]
       acts.forEach((a, i) => (a.group.visible = i === st.act))
-
-      act.rigs.forEach((rig, i) => {
-        const s = st.stages[i]
-        const found = ease(seg(s, 0, 0.2))
-        const L = ease(seg(s, 0.22, 0.55))
-        const M = ease(seg(s, 0.55, 0.75))
-        const lit = ease(seg(s, 0.78, 0.92))
-        const poleOn = s > 0.2
-        act.blocks[i].visible = s > 0 && !poleOn
-        act.blocks[i].scale.y = Math.max(0.001, found)
-        act.blocks[i].position.y = 0.12 * Math.max(0.001, found)
-        act.tilts[i].visible = poleOn
-        act.tilts[i].rotation.z = rad(82) * (1 - L)
-        rig.top.position.y = 2.4 * (1 - M)
-        rig.top.visible = M > 0.01
-        rig.setLit(lit)
-      })
-
-      // crane works on the current pole
-      const cur = st.cur
-      const craneOn = cur >= 0 && st.stages[cur] > 0.1 && st.stages[cur] < 0.88
-      act.crane.group.visible = craneOn
-      if (craneOn) {
-        const sx = act.slotX[cur]
-        act.crane.group.position.set(sx - 8.2, 0, act.poleZ)
-        const L = ease(seg(st.stages[cur], 0.22, 0.55))
-        const theta = rad(82) * (1 - L)
-        const H = act.rigs[cur].poleHeight * act.scale
-        attachW.set(sx - Math.sin(theta) * H * 0.78, Math.cos(theta) * H * 0.78, act.poleZ)
-        tipW.copy(act.crane.tipLocal)
-        act.crane.group.localToWorld(tipW)
-        attachL.copy(attachW)
-        act.crane.group.worldToLocal(attachL)
-        const pos = act.crane.cable.geometry.attributes.position as THREE.BufferAttribute
-        pos.setXYZ(0, act.crane.tipLocal.x, act.crane.tipLocal.y, act.crane.tipLocal.z)
-        pos.setXYZ(1, attachL.x, attachL.y, attachL.z)
-        pos.needsUpdate = true
-      }
-
+      applyStages(act, st.stages, st.cur)
       const fx = act.X + lerp(-14, 14, ease(st.t))
       out.pos.set(fx - 5.5, 3.4, act.camZ)
       out.target.set(fx - 3.0, 3.0, act.poleZ + 1)
       out.fov = 52
       out.focus.set(fx, 0, 0)
       out.env = timeEnv(sunEl[st.act], 40, { exposure: 0.95, hemi: 0.95, envI: 0.8 })
+      out.lamps = act.rigs
+      return out
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Showcase chapters: same 3D sets, finished and lit, new camera moves  */
+/* ------------------------------------------------------------------ */
+function storyShowcase(base: ReturnType<typeof storyChapter>, kind: 'hero' | 'clients' | 'cta'): Chapter {
+  const out: Out = {
+    pos: new THREE.Vector3(),
+    target: new THREE.Vector3(),
+    fov: 54,
+    env: timeEnv(-4, 40, { sunI: 0, moonI: 0.5, hemi: 0.55, envI: 0.35, exposure: 0.95, fogD: 0.011, stars: 0.7 }),
+    focus: new THREE.Vector3(),
+    lamps: base.lamps
+  }
+  return {
+    group: base.group,
+    update(q) {
+      base.lamps.forEach(l => l.setLit(1))
+      let x = 0
+      if (kind === 'hero') {
+        x = lerp(-10, 34, q)
+        out.pos.set(x, lerp(2.4, 3.6, q), 9.8)
+        out.target.set(x + 16, 4.2, -5)
+        out.fov = 56
+      } else if (kind === 'clients') {
+        x = lerp(36, 84, q)
+        out.pos.set(x, 2.1, 6.8)
+        out.target.set(x + 14, 3.4, -4.5)
+        out.fov = 54
+      } else {
+        x = lerp(70, 44, q)
+        out.pos.set(x, lerp(2.4, 8.5, q), lerp(7.5, 16, q))
+        out.target.set(x + 10, 3.4, -4)
+        out.fov = 52
+      }
+      out.focus.set(x, 0, -2)
+      return out
+    }
+  }
+}
+
+function anatomyShowcase(base: ReturnType<typeof anatomyChapter>): Chapter {
+  const { straight, bent, X0 } = base
+  const out: Out = {
+    pos: new THREE.Vector3(),
+    target: new THREE.Vector3(),
+    fov: 44,
+    env: timeEnv(5, 38, { exposure: 0.9, hemi: 0.95, envI: 0.9 }),
+    focus: new THREE.Vector3(X0, 0, 0),
+    lamps: [straight, bent]
+  }
+  return {
+    group: base.group,
+    update(q, t) {
+      straight.setLit(0.85)
+      bent.setLit(0.85)
+      straight.root.rotation.z = Math.sin(t * 0.9) * 0.006
+      bent.root.rotation.z = Math.sin(t * 0.9 + 1) * 0.006
+      const a = lerp(-0.9, 0.9, q)
+      out.pos.set(X0 + 11 * Math.sin(a), lerp(3.2, 5.2, q), 11 * Math.cos(a))
+      out.target.set(X0, 3.6, 0)
+      return out
+    }
+  }
+}
+
+function installShowcase(base: InstallChapter, actIdx: number): Chapter {
+  const out: Out = {
+    pos: new THREE.Vector3(),
+    target: new THREE.Vector3(),
+    fov: 50,
+    env: timeEnv(3, 40, { exposure: 0.95, hemi: 0.95, envI: 0.8 }),
+    focus: new THREE.Vector3(),
+    lamps: []
+  }
+  const sunEl = [3, 2, 4]
+  return {
+    group: base.group,
+    update(q) {
+      const act = base.acts[actIdx]
+      base.acts.forEach((a, i) => (a.group.visible = i === actIdx))
+      base.applyStages(act, [1, 1, 1], -1)
+      const x = act.X + lerp(-30, 30, q)
+      out.pos.set(x - 6, 3.0, act.camZ - 1)
+      out.target.set(x + 8, 3.2, act.poleZ + 1)
+      out.focus.set(x, 0, 0)
+      out.env = timeEnv(sunEl[actIdx], 40, { exposure: 0.95, hemi: 0.95, envI: 0.8 })
       out.lamps = act.rigs
       return out
     }
@@ -934,8 +1029,26 @@ export function createWorld(opts: WorldOptions): World {
 
   /* chapters */
   const ctx: Ctx = { mats, tex, scene, milestoneCount }
-  const chapters: Chapter[] = [storyChapter(ctx), anatomyChapter(ctx), solarChapter(ctx), truckChapter(ctx), reachChapter(ctx), installChapter(ctx)]
-  scene.add(chapters[5].group)
+  const story = storyChapter(ctx)
+  const anatomy = anatomyChapter(ctx)
+  const install = installChapter(ctx)
+  scene.add(install.group)
+  const byId: Record<ChapterId, Chapter> = {
+    hero: storyShowcase(story, 'hero'),
+    story,
+    clients: storyShowcase(story, 'clients'),
+    anatomy,
+    solar: solarChapter(ctx),
+    truck: truckChapter(ctx),
+    reach: reachChapter(ctx),
+    install,
+    why: anatomyShowcase(anatomy),
+    mission: installShowcase(install, 1),
+    services: installShowcase(install, 2),
+    community: installShowcase(install, 0),
+    cta: storyShowcase(story, 'cta')
+  }
+  const chapters: Chapter[] = CHAPTERS.map(c => byId[c.id])
 
   /* sizing */
   let w = 1
@@ -1043,7 +1156,8 @@ export function createWorld(opts: WorldOptions): World {
     if (Math.abs(target - cur) < 0.00005) cur = target
 
     const { i, q } = chapterAt(cur)
-    chapters.forEach((c, k) => (c.group.visible = k === i))
+    chapters.forEach(c => (c.group.visible = false))
+    chapters[i].group.visible = true
     const t = now / 1000
     const out = chapters[i].update(q, t)
 

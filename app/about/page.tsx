@@ -20,7 +20,9 @@ import {
 import Breadcrumbs from '@/components/Breadcrumbs'
 import Reveal from '@/components/Reveal'
 import Streetlight from '@/components/about/Streetlight'
-import Journey from '@/components/about/Journey'
+import AboutExperience from '@/components/about/AboutExperience'
+import { LegacyJourney } from '@/components/about/Journey'
+import type { AboutData, IconKey } from '@/components/about/world/data'
 import type { Milestone, Region } from '@/components/about/Scenes'
 import { panelGreen, btnAmber, btnGhostDark } from '@/lib/ui'
 
@@ -51,11 +53,11 @@ const milestones: Milestone[] = [
 // Add real client or project names here (or logos later). Leave empty to hide the name strip.
 const clientNames: string[] = []
 
-const clientTypes: { Icon: LucideIcon; title: string; text: string }[] = [
-  { Icon: Landmark, title: 'Government institutions', text: 'Compliant, durable, and cost-efficient lighting for public projects.' },
-  { Icon: Route, title: 'Large-scale projects', text: 'Roads, campuses, and developments that need dependable supply and installation.' },
-  { Icon: Users, title: 'Communities', text: 'Safer streets, schools, and health facilities through lighting partnerships.' },
-  { Icon: Building2, title: 'Multi-branch businesses', text: 'One supplier with branches and warehouses near every site.' }
+const clientTypes: { icon: IconKey; Icon: LucideIcon; title: string; text: string }[] = [
+  { icon: 'landmark', Icon: Landmark, title: 'Government institutions', text: 'Compliant, durable, and cost-efficient lighting for public projects.' },
+  { icon: 'route', Icon: Route, title: 'Large-scale projects', text: 'Roads, campuses, and developments that need dependable supply and installation.' },
+  { icon: 'users', Icon: Users, title: 'Communities', text: 'Safer streets, schools, and health facilities through lighting partnerships.' },
+  { icon: 'building', Icon: Building2, title: 'Multi-branch businesses', text: 'One supplier with branches and warehouses near every site.' }
 ]
 
 // Qualitative only. Add certified figures (IP rating, wind load, coating) once confirmed per product.
@@ -85,11 +87,11 @@ const regions: Region[] = [
   }
 ]
 
-const pillars: { Icon: LucideIcon; title: string; text: string }[] = [
-  { Icon: Award, title: `Industry experts since ${FOUNDED}`, text: 'Years of hands-on experience in lighting and electrical systems for businesses, government, and communities.' },
-  { Icon: Settings, title: 'Commitment to product development', text: 'We keep improving what we offer so every product is efficient, durable, and ready for the future.' },
-  { Icon: Headset, title: 'Excellent after-sales service', text: 'Our team stays with you after delivery, from technical questions to installation support.' },
-  { Icon: MapPin, title: 'Nationwide presence', text: 'Branches and warehouses across Luzon, Visayas, and Mindanao keep support close to every project.' }
+const pillars: { icon: IconKey; Icon: LucideIcon; title: string; text: string }[] = [
+  { icon: 'award', Icon: Award, title: `Industry experts since ${FOUNDED}`, text: 'Years of hands-on experience in lighting and electrical systems for businesses, government, and communities.' },
+  { icon: 'settings', Icon: Settings, title: 'Commitment to product development', text: 'We keep improving what we offer so every product is efficient, durable, and ready for the future.' },
+  { icon: 'headset', Icon: Headset, title: 'Excellent after-sales service', text: 'Our team stays with you after delivery, from technical questions to installation support.' },
+  { icon: 'mapPin', Icon: MapPin, title: 'Nationwide presence', text: 'Branches and warehouses across Luzon, Visayas, and Mindanao keep support close to every project.' }
 ]
 
 const whatWeDo = [
@@ -99,20 +101,23 @@ const whatWeDo = [
   'Support for businesses across multiple branches nationwide'
 ]
 
-const services: { Icon: LucideIcon; step: string; title: string; text: string }[] = [
+const services: { icon: IconKey; Icon: LucideIcon; step: string; title: string; text: string }[] = [
   {
+    icon: 'monitor',
     Icon: Monitor,
     step: '01',
     title: 'Dialux Services',
     text: 'Our Dialux simulations help create and identify lighting designs and specifications, so you can see your desired lighting scheme before anything is installed.'
   },
   {
+    icon: 'clipboard',
     Icon: ClipboardCheck,
     step: '02',
     title: 'Project Management',
     text: 'Our electrical engineers conduct site visits before and after implementation, giving accurate recommendations for proper execution and installation of products.'
   },
   {
+    icon: 'wrench',
     Icon: Wrench,
     step: '03',
     title: 'Installation',
@@ -149,10 +154,56 @@ export default function AboutPage() {
     { value: '3', label: 'In-house services' }
   ]
 
+  const data: AboutData = {
+    hero: {
+      eyebrow: 'About Ecoshift Corporation',
+      titleStart: 'The fastest-growing provider of',
+      titleAccent: 'innovative lighting',
+      titleEnd: 'solutions.',
+      sub: `Delivering sustainable, energy-efficient, and future-ready systems since ${FOUNDED}.`
+    },
+    stats,
+    milestones,
+    clientsIntro: {
+      eyebrow: 'Who we work with',
+      title: 'Trusted on projects big and small',
+      text: 'Ecoshift is a reliable partner for government institutions and large-scale projects, with a proven record of delivering sustainable and cost-efficient lighting.'
+    },
+    clientTypes: clientTypes.map(({ icon, title, text }) => ({ icon, title, text })),
+    clientNames,
+    durability,
+    regions,
+    whyIntro: { eyebrow: 'Why Ecoshift', title: 'Built on four promises' },
+    pillars: pillars.map(({ icon, title, text }) => ({ icon, title, text })),
+    mission: 'To accelerate the shift toward sustainable energy by delivering high-quality, cost-effective lighting and electrical products, backed by exceptional service.',
+    whatWeDo,
+    servicesIntro: {
+      eyebrow: 'Beyond the product',
+      title: 'From design to switch-on',
+      text: 'Three in-house services take your project from the first idea to the final installation.'
+    },
+    services: services.map(({ icon, step, title, text }) => ({ icon, step, title, text })),
+    communityIntro: {
+      eyebrow: 'More than just lighting products',
+      title: 'Lighting the way to a brighter future',
+      text: 'Ecoshift Corporation is committed to uplifting Filipino communities through sustainable lighting solutions. Through energy-efficient technologies and community partnerships, we provide innovative systems that enhance safety, accessibility, and long-term progress.'
+    },
+    community: community.map(({ image, tag, line }) => ({ image, tag, line })),
+    cta: {
+      title: 'Let’s build brighter futures',
+      accent: 'together',
+      text: 'Ecoshift is committed to being a reliable partner for government institutions and large-scale projects. With a proven track record in delivering sustainable and cost-efficient lighting solutions, we ensure compliance, durability, and long-term value.'
+    }
+  }
+
   return (
     <div className="eco-motion mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <style>{keyframes}</style>
       <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
+      <AboutExperience
+        data={data}
+        fallback={
+          <>
 
       {/* Hero */}
       <section className={`${panelGreen} mt-5 px-5 pb-6 pt-12 sm:px-10 sm:pt-16 lg:px-14 lg:pt-20`}>
@@ -206,7 +257,7 @@ export default function AboutPage() {
       </section>
 
       {/* The 3D journey: story, product, solar, delivery, reach, installation */}
-      <Journey milestones={milestones} regions={regions} durability={durability} />
+      <LegacyJourney milestones={milestones} regions={regions} durability={durability} />
 
       {/* 2. Clients */}
       <section className="mt-16 sm:mt-24" aria-labelledby="clients-heading">
@@ -393,6 +444,9 @@ export default function AboutPage() {
           </div>
         </Reveal>
       </section>
+          </>
+        }
+      />
     </div>
   )
 }

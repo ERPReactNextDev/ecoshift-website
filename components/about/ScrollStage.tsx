@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
+/** Height of your sticky site header + a little breathing room. Adjust if your navbar is taller. */
 export const STICKY_TOP = 72
+/** Stage height = viewport height minus this. */
 export const STAGE_OFFSET = 88
 
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
@@ -10,6 +12,11 @@ export const seg = (p: number, a: number, b: number) => clamp((p - a) / (b - a))
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 export const ease = (t: number) => t * t * (3 - 2 * t)
 
+/**
+ * A tall scroll area with a sticky "stage" inside it.
+ * As the visitor scrolls through the tall area, children receive progress p from 0 to 1.
+ * With prefers-reduced-motion the scroll-jacking is skipped and the final state is shown.
+ */
 export default function ScrollStage({
   heightVh = 300,
   children
@@ -30,9 +37,13 @@ export default function ScrollStage({
   }, [])
 
   useEffect(() => {
-    if (reduced) { setP(1); return }
+    if (reduced) {
+      setP(1)
+      return
+    }
     const el = ref.current
     if (!el) return
+
     let raf = 0
     const calc = () => {
       raf = 0
@@ -41,7 +52,10 @@ export default function ScrollStage({
       const next = total > 0 ? clamp((STICKY_TOP - r.top) / total) : 0
       setP(prev => (Math.abs(prev - next) < 0.0015 ? prev : next))
     }
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(calc) }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(calc)
+    }
+
     let listening = false
     const attach = () => {
       if (listening) return
@@ -56,9 +70,16 @@ export default function ScrollStage({
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
+
+    // Only listen to scroll while this section is near the viewport
     const io = new IntersectionObserver(([entry]) => (entry.isIntersecting ? attach() : detach()), { rootMargin: '150px 0px' })
     io.observe(el)
-    return () => { io.disconnect(); detach(); if (raf) cancelAnimationFrame(raf) }
+
+    return () => {
+      io.disconnect()
+      detach()
+      if (raf) cancelAnimationFrame(raf)
+    }
   }, [reduced])
 
   return (
